@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AcadMetrics | Student Performance Analytics</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+</head>
+
+<body>
+  <div id="scene"></div>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">A</div>
+        <div>
+          <h2>AcadMetrics</h2>
+          <span>STUDENT INTELLIGENCE</span>
+        </div>
+      </div>
+
+      <div class="nav-label">WORKSPACE</div>
+      <nav>
+        <button class="nav-link active" data-page="home">⌂ <span>Overview</span></button>
+        <button class="nav-link" data-page="dashboard">▦ <span>Dashboard</span></button>
+        <button class="nav-link" data-page="records">▤ <span>Student Records</span></button>
+        <button class="nav-link" data-page="analytics">◈ <span>Analytics</span></button>
+        <button class="nav-link" data-page="visuals">◉ <span>3D Visualisation</span></button>
+        <button class="nav-link" data-page="regression">⌁ <span>Regression Lab</span></button>
+        <button class="nav-link" data-page="prediction">✧ <span>Prediction Studio</span></button>
+        <button class="nav-link" data-page="compare">⇄ <span>Compare Students</span></button>
+        <button class="nav-link" data-page="reports">▧ <span>Reports & Export</span></button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="project-status">
+          <span class="status-dot"></span>
+          Demo environment
+          <small>Sample dataset loaded</small>
+        </div>
+        <button class="nav-link" data-page="about">ⓘ <span>About Project</span></button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">ACADEMIC INTELLIGENCE PLATFORM</p>
+          <h1 id="page-heading">Overview</h1>
+        </div>
+        <div class="top-actions">
+          <span class="demo-tag">● DEMO DATA</span>
+          <div class="avatar">AM</div>
+        </div>
+      </header>
+
+      <section class="page active" id="home">
+        <div class="hero">
+          <div class="hero-copy">
+            <span class="hero-tag">✦ DATA-DRIVEN LEARNING</span>
+            <h2>Understand performance.<br><em>Unlock potential.</em></h2>
+            <p>Explore how study habits, attendance, sleep and previous academic scores relate to student performance — using correlation and regression analysis.</p>
+            <div class="hero-buttons">
+              <button class="primary-btn" data-go="dashboard">Explore Dashboard ↗</button>
+              <button class="secondary-btn" data-go="prediction">Try Prediction Studio</button>
+            </div>
+          </div>
+          <div class="hero-art">
+            <div class="orb orb-back"></div>
+            <div class="orb orb-front"></div>
+            <div class="floating-card">
+              <span>PERFORMANCE INDEX</span>
+              <strong>69.8<small>/100</small></strong>
+              <div class="mini-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <small>Illustrative dataset average</small>
+            </div>
+            <div class="floating-chip chip-one">↗ 0.82 correlation</div>
+            <div class="floating-chip chip-two">✦ Regression insights</div>
+          </div>
+        </div>
+
+        <div class="section-heading">
+          <div><p class="eyebrow">YOUR WORKSPACE</p><h3>Explore the platform</h3></div>
+          <span class="muted">Select a module to get started</span>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card" data-go="analytics"><span>◈</span><h3>Analytics</h3><p>Discover patterns and relationships between student variables.</p><b>Explore module ↗</b></article>
+          <article class="feature-card" data-go="visuals"><span>◉</span><h3>3D Visualisation</h3><p>Explore student performance through interactive visual views.</p><b>Explore module ↗</b></article>
+          <article class="feature-card" data-go="regression"><span>⌁</span><h3>Regression Lab</h3><p>Understand simple and multiple linear regression models.</p><b>Explore module ↗</b></article>
+          <article class="feature-card" data-go="prediction"><span>✧</span><h3>Prediction Studio</h3><p>Enter student details and estimate academic performance.</p><b>Explore module ↗</b></article>
+        </div>
+      </section>
+
+      <section class="page" id="dashboard">
+        <div class="section-heading"><div><p class="eyebrow">DATA SNAPSHOT</p><h3>Performance at a glance</h3></div><span class="muted">60 simulated students</span></div>
+        <div class="stat-grid">
+          <div class="stat-card"><span>Total students</span><strong>60</strong><small>Sample records</small></div>
+          <div class="stat-card"><span>Average final marks</span><strong>69.8</strong><small>Out of 100</small></div>
+          <div class="stat-card"><span>Average attendance</span><strong>78.2%</strong><small>Across sample</small></div>
+          <div class="stat-card"><span>Study hours / day</span><strong>5.1</strong><small>Average hours</small></div>
+        </div>
+        <div class="panel chart-panel"><div class="panel-heading"><div><p class="eyebrow">PERFORMANCE OVERVIEW</p><h3>Marks distribution</h3></div><span class="muted">Sample data</span></div><canvas id="marksChart"></canvas></div>
+      </section>
+
+      <section class="page" id="records">
+        <div class="section-heading"><div><p class="eyebrow">DATA MANAGEMENT</p><h3>Student records</h3></div><button class="secondary-btn" id="upload-trigger">＋ Upload CSV</button></div>
+        <div class="panel">
+          <div class="toolbar"><input id="search-student" placeholder="Search student ID..."><button class="secondary-btn" id="reset-search">Reset filters</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Student ID</th><th>Study hrs</th><th>Attendance</th><th>Sleep hrs</th><th>Previous score</th><th>Final marks</th></tr></thead><tbody id="student-table"></tbody></table></div>
+          <input type="file" id="csv-upload" accept=".csv" hidden>
+          <p class="muted" id="record-message">Showing sample records. Upload a CSV to preview your own data.</p>
+        </div>
+      </section>
+
+      <section class="page" id="analytics">
+        <div class="section-heading"><div><p class="eyebrow">RELATIONSHIP DISCOVERY</p><h3>Correlation analysis</h3></div><span class="demo-tag">SAMPLE RESULT</span></div>
+        <div class="stat-grid">
+          <div class="stat-card"><span>Study hours vs marks</span><strong>0.82</strong><small>Strong positive correlation</small></div>
+          <div class="stat-card"><span>Simple model R²</span><strong>0.664</strong><small>Explained variation</small></div>
+          <div class="stat-card"><span>Multiple model R²</span><strong>0.724</strong><small>Combined variables</small></div>
+        </div>
+        <div class="panel chart-panel"><div class="panel-heading"><div><p class="eyebrow">VARIABLE RELATIONSHIP</p><h3>Study hours and final marks</h3></div></div><canvas id="correlationChart"></canvas></div>
+      </section>
+
+      <section class="page" id="visuals">
+        <div class="section-heading"><div><p class="eyebrow">INTERACTIVE EXPLORATION</p><h3>3D visualisation</h3></div><span class="demo-tag">3D SCENE</span></div>
+        <div class="panel"><div id="plot3d"></div><p class="muted">Drag to rotate the 3D scene. This is a visual demo; connect the actual dataset in the backend later.</p></div>
+      </section>
+
+      <section class="page" id="regression">
+        <div class="section-heading"><div><p class="eyebrow">MATHEMATICAL MODELLING</p><h3>Regression lab</h3></div></div>
+        <div class="model-grid">
+          <div class="panel"><p class="eyebrow">SIMPLE LINEAR REGRESSION</p><h3>One predictor</h3><div class="equation">y = 50.53 + 3.75x</div><p>Uses study hours to estimate final marks.</p><span class="demo-tag">R² = 0.664</span></div>
+          <div class="panel"><p class="eyebrow">MULTIPLE LINEAR REGRESSION</p><h3>Multiple predictors</h3><div class="equation">y = 28.68 + 3.73x₁ + 0.136x₂ + 0.90x₃ + 0.084x₄</div><p>Combines study hours, attendance, sleep and previous score.</p><span class="demo-tag">R² = 0.724</span></div>
+        </div>
+        <div class="panel"><h3>Model evaluation</h3><p>Simple model RMSE: <b>4.15</b> · Multiple model RMSE: <b>3.76</b></p><p class="muted">These are illustrative values from the project's simulated dataset.</p></div>
+      </section>
+
+      <section class="page" id="prediction">
+        <div class="section-heading"><div><p class="eyebrow">ESTIMATE ACADEMIC OUTCOME</p><h3>Prediction studio</h3></div><span class="demo-tag">DEMO MODEL</span></div>
+        <div class="prediction-layout">
+          <div class="panel form-panel">
+            <label>Study hours per day<input type="number" id="study" value="6" min="0" max="24"></label>
+            <label>Attendance percentage<input type="number" id="attendance" value="85" min="0" max="100"></label>
+            <label>Sleep hours per night<input type="number" id="sleep" value="7" min="0" max="24"></label>
+            <label>Previous exam score<input type="number" id="previous" value="70" min="0" max="100"></label>
+            <button class="primary-btn" id="predict-btn">Generate prediction ↗</button>
+            <p class="muted">Demo calculation only. The final prediction will use the trained backend model.</p>
+          </div>
+          <div class="panel result-panel"><span class="eyebrow">ESTIMATED FINAL MARKS</span><strong id="prediction-result">74.9</strong><p id="prediction-caption">Enter values and generate a new estimate.</p><div class="result-line"></div><span class="muted">Illustrative model output / 100</span></div>
+        </div>
+      </section>
+
+      <section class="page" id="compare">
+        <div class="section-heading"><div><p class="eyebrow">SIDE-BY-SIDE ANALYSIS</p><h3>Compare students</h3></div></div>
+        <div class="panel compare-panel">
+          <p>Select two sample students to compare their academic details.</p>
+          <div class="compare-inputs"><label>Student A<select id="student-a"></select></label><label>Student B<select id="student-b"></select></label></div>
+          <button class="primary-btn" id="compare-btn">Compare performance</button>
+          <div id="compare-result"></div>
+        </div>
+      </section>
+
+      <section class="page" id="reports">
+        <div class="section-heading"><div><p class="eyebrow">YOUR ANALYSIS</p><h3>Reports & export</h3></div></div>
+        <div class="feature-grid">
+          <article class="feature-card"><span>▤</span><h3>Student dataset</h3><p>Export the currently loaded sample records as CSV.</p><button class="secondary-btn" id="export-csv">Download CSV ↓</button></article>
+          <article class="feature-card"><span>▧</span><h3>Analysis report</h3><p>Save a quick summary of the current demo model.</p><button class="secondary-btn" id="export-summary">Download summary ↓</button></article>
+        </div>
+      </section>
+
+      <section class="page" id="about">
+        <div class="section-heading"><div><p class="eyebrow">PROJECT INFORMATION</p><h3>About AcadMetrics</h3></div></div>
+        <div class="panel about-panel"><h2>Modelling Student Academic Performance</h2><p>This project studies how study hours, attendance, sleep duration and previous exam scores relate to final academic marks. It uses descriptive statistics, Pearson correlation, simple linear regression and multiple linear regression.</p><div class="about-pills"><span>Statistics</span><span>Correlation</span><span>Regression</span><span>Prediction</span></div><p class="muted">Built as an academic mini-project. The current interface uses illustrative sample values until the backend is connected.</p></div>
+      </section>
+
+      <footer>ACADMETRICS <span>·</span> STUDENT PERFORMANCE ANALYTICS <span>·</span> 2026</footer>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
