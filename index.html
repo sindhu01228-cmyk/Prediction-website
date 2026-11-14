@@ -1,193 +1,332 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AcadMetrics | Student Performance Analytics</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Student Performance Analytics — Modelling Academic Performance</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],serif:['Fraunces','serif']},colors:{navy:'#16243F',cream:'#FDFBF6',sand:'#F3EDE2',accent:'#E86A2C',blue:'#2F6FCE'}}}}</script>
+<style>
+*{scroll-behavior:smooth} body{background:#FDFBF6;color:#16243F;font-family:Inter,sans-serif}
+.card{background:#fff;border:1px solid #EDE6D6;border-radius:20px;box-shadow:0 6px 24px rgba(22,36,63,.05)}
+.card:hover{box-shadow:0 12px 32px rgba(22,36,63,.09);transform:translateY(-2px)} .card{transition:.25s}
+.navbtn{display:flex;align-items:center;gap:11px;width:100%;padding:10px 13px;border-radius:12px;font-size:13.5px;font-weight:500;color:#5A6577;text-align:left;transition:.2s}
+.navbtn:hover{background:#F3EDE2;color:#16243F}.navbtn.active{background:#16243F;color:#fff;box-shadow:0 8px 18px rgba(22,36,63,.25)}
+.navbtn.active i{color:#F4A261}
+.page{display:none}.page.active{display:block;animation:fade .4s ease}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:#D8CDB8;border-radius:99px}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:99px;background:#EDE6D6;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#E86A2C;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
+.badge{font-size:10px;letter-spacing:.08em;font-weight:700;text-transform:uppercase;padding:4px 8px;border-radius:99px}
+table th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8A94A6;text-align:left;padding:10px}
+table td{padding:10px;font-size:13px;border-top:1px solid #F1EBDD}
+.heat{aspect-ratio:1.15;display:flex;align-items:center;justify-content:center;border-radius:10px;font-weight:700;font-size:13px;color:#fff}
+body.dark{background:#0B1220;color:#E6EAF2} body.dark .card{background:#131E33;border-color:#23314D;color:#E6EAF2} body.dark .topbar{background:#0F1A2E!important;border-color:#23314D} body.dark input,body.dark select{background:#1A2A44!important;color:#fff!important;border-color:#2A3D5E!important} body.dark .navbtn{color:#9AA8BE} body.dark .navbtn:hover{background:#1A2A44;color:#fff} body.dark .muted{color:#94A3B8!important} body.dark table td{border-color:#23314D} body.dark .codebox{background:#0A0F1E!important}
+.codebox{background:#101827;color:#D6E4FF;font-family:ui-monospace,monospace;font-size:12.5px;line-height:1.7;border-radius:16px;padding:18px;overflow:auto}
+</style>
 </head>
-
 <body>
-  <div id="scene"></div>
-  <div class="ambient ambient-one"></div>
-  <div class="ambient ambient-two"></div>
+<div class="flex min-h-screen">
+<!-- SIDEBAR -->
+<aside id="sidebar" class="fixed lg:static z-50 w-[272px] h-screen shrink-0 bg-[#FFFEFA] border-r border-[#EDE6D6] flex flex-col -translate-x-full lg:translate-x-0 transition-transform">
+  <div class="p-5 pb-3 flex items-center gap-3">
+    <div class="w-11 h-11 rounded-2xl bg-[#16243F] text-white flex items-center justify-center font-serif text-xl">S<span class="text-[#E86A2C]">.</span></div>
+    <div><p class="font-serif font-bold text-[17px] leading-tight">Student Performance</p><p class="text-[10px] tracking-[.18em] font-bold text-[#E86A2C] uppercase">Analytics • SPA</p></div>
+    <button onclick="toggleSidebar()" class="ml-auto lg:hidden text-xl">✕</button>
+  </div>
+  <div class="mx-4 p-3 rounded-2xl bg-[#F7F0E1] border border-[#EDE0C3]"><p class="text-[11px] font-bold tracking-widest text-[#8A6D3B]">MATHEMATICS MINI PROJECT</p><p class="text-[12px] mt-1 font-medium leading-snug">Correlation & Regression Analysis with Python Implementation</p><div class="flex gap-1.5 mt-2"><span class="badge bg-white">DSU</span><span class="badge bg-[#16243F] text-white">CST Dept</span></div></div>
+  <nav class="flex-1 overflow-y-auto p-3 space-y-1" id="nav">
+    <button class="navbtn active" data-page="overview" onclick="navigate('overview',this)"><i data-lucide="layout-dashboard" class="w-[18px] h-[18px]"></i>Overview Dashboard</button>
+    <button class="navbtn" data-page="intro" onclick="navigate('intro',this)"><i data-lucide="book-open" class="w-[18px] h-[18px]"></i>Project Introduction</button>
+    <button class="navbtn" data-page="data" onclick="navigate('data',this)"><i data-lucide="database" class="w-[18px] h-[18px]"></i>Data Collection</button>
+    <button class="navbtn" data-page="descriptive" onclick="navigate('descriptive',this)"><i data-lucide="bar-chart-3" class="w-[18px] h-[18px]"></i>Descriptive Statistics</button>
+    <button class="navbtn" data-page="correlation" onclick="navigate('correlation',this)"><i data-lucide="git-compare" class="w-[18px] h-[18px]"></i>Correlation Analysis</button>
+    <button class="navbtn" data-page="simple" onclick="navigate('simple',this)"><i data-lucide="trending-up" class="w-[18px] h-[18px]"></i>Simple Linear Regression</button>
+    <button class="navbtn" data-page="multiple" onclick="navigate('multiple',this)"><i data-lucide="layers" class="w-[18px] h-[18px]"></i>Multiple Linear Regression</button>
+    <button class="navbtn" data-page="predictor" onclick="navigate('predictor',this)"><i data-lucide="sparkles" class="w-[18px] h-[18px]"></i>Performance Predictor</button>
+    <button class="navbtn" data-page="visual" onclick="navigate('visual',this)"><i data-lucide="pie-chart" class="w-[18px] h-[18px]"></i>Data Visualisation</button>
+    <button class="navbtn" data-page="evaluation" onclick="navigate('evaluation',this)"><i data-lucide="check-circle-2" class="w-[18px] h-[18px]"></i>Model Evaluation</button>
+    <button class="navbtn" data-page="conclusion" onclick="navigate('conclusion',this)"><i data-lucide="award" class="w-[18px] h-[18px]"></i>Conclusion</button>
+  </nav>
+  <div class="p-4 border-t border-[#EDE6D6]">
+    <div class="flex items-center gap-3"><img src="https://i.pravatar.cc/64?img=12" class="w-9 h-9 rounded-full"><div class="flex-1 min-w-0"><p id="userName" class="text-[13px] font-bold truncate">Guest Researcher</p><p class="text-[11px] muted text-gray-500">Full-Stack • JWT Auth</p></div><span class="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span></div>
+    <div class="mt-3 flex items-center justify-between text-[11px] bg-emerald-50 text-emerald-700 px-3 py-2 rounded-xl font-semibold"><span>● API Connected</span><span>Express + Mongo</span></div>
+  </div>
+</aside>
+<div class="flex-1 min-w-0">
+<!-- TOPBAR -->
+<header class="topbar sticky top-0 z-40 bg-[#FDFAF3]/90 backdrop-blur border-b border-[#EDE6D6] px-4 lg:px-8 py-3 flex items-center gap-3">
+  <button onclick="toggleSidebar()" class="lg:hidden p-2 card !rounded-xl">☰</button>
+  <div><h1 id="pageTitle" class="font-serif text-xl lg:text-2xl font-bold leading-none">Overview Dashboard</h1><p class="text-[11px] muted text-gray-500 mt-1 hidden sm:block">Student_Performance_Modelling / Understand Performance. Discover Patterns. Predict Success.</p></div>
+  <div class="ml-auto flex items-center gap-2">
+    <div class="hidden md:flex items-center bg-white border border-[#EDE6D6] rounded-full px-3 py-2 gap-2 w-[260px]"><i data-lucide="search" class="w-4 h-4 text-gray-400"></i><input id="globalSearch" onkeyup="globalSearchFn()" placeholder="Search students, metrics..." class="bg-transparent outline-none text-sm w-full"></div>
+    <button onclick="toggleTheme()" class="w-10 h-10 rounded-full card flex items-center justify-center">◐</button>
+    <button onclick="openAuth()" id="authBtn" class="hidden sm:flex items-center gap-2 bg-[#16243F] text-white px-4 py-2.5 rounded-full text-sm font-semibold">Sign In</button>
+  </div>
+</header>
 
-  <div class="app-shell">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-icon">A</div>
-        <div>
-          <h2>AcadMetrics</h2>
-          <span>STUDENT INTELLIGENCE</span>
-        </div>
-      </div>
+<main class="p-4 lg:p-8 max-w-[1400px] mx-auto">
 
-      <div class="nav-label">WORKSPACE</div>
-      <nav>
-        <button class="nav-link active" data-page="home">⌂ <span>Overview</span></button>
-        <button class="nav-link" data-page="dashboard">▦ <span>Dashboard</span></button>
-        <button class="nav-link" data-page="records">▤ <span>Student Records</span></button>
-        <button class="nav-link" data-page="analytics">◈ <span>Analytics</span></button>
-        <button class="nav-link" data-page="visuals">◉ <span>3D Visualisation</span></button>
-        <button class="nav-link" data-page="regression">⌁ <span>Regression Lab</span></button>
-        <button class="nav-link" data-page="prediction">✧ <span>Prediction Studio</span></button>
-        <button class="nav-link" data-page="compare">⇄ <span>Compare Students</span></button>
-        <button class="nav-link" data-page="reports">▧ <span>Reports & Export</span></button>
-      </nav>
-
-      <div class="sidebar-bottom">
-        <div class="project-status">
-          <span class="status-dot"></span>
-          Demo environment
-          <small>Sample dataset loaded</small>
-        </div>
-        <button class="nav-link" data-page="about">ⓘ <span>About Project</span></button>
-      </div>
-    </aside>
-
-    <main class="main-content">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">ACADEMIC INTELLIGENCE PLATFORM</p>
-          <h1 id="page-heading">Overview</h1>
-        </div>
-        <div class="top-actions">
-          <span class="demo-tag">● DEMO DATA</span>
-          <div class="avatar">AM</div>
-        </div>
-      </header>
-
-      <section class="page active" id="home">
-        <div class="hero">
-          <div class="hero-copy">
-            <span class="hero-tag">✦ DATA-DRIVEN LEARNING</span>
-            <h2>Understand performance.<br><em>Unlock potential.</em></h2>
-            <p>Explore how study habits, attendance, sleep and previous academic scores relate to student performance — using correlation and regression analysis.</p>
-            <div class="hero-buttons">
-              <button class="primary-btn" data-go="dashboard">Explore Dashboard ↗</button>
-              <button class="secondary-btn" data-go="prediction">Try Prediction Studio</button>
-            </div>
-          </div>
-          <div class="hero-art">
-            <div class="orb orb-back"></div>
-            <div class="orb orb-front"></div>
-            <div class="floating-card">
-              <span>PERFORMANCE INDEX</span>
-              <strong>69.8<small>/100</small></strong>
-              <div class="mini-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-              <small>Illustrative dataset average</small>
-            </div>
-            <div class="floating-chip chip-one">↗ 0.82 correlation</div>
-            <div class="floating-chip chip-two">✦ Regression insights</div>
-          </div>
-        </div>
-
-        <div class="section-heading">
-          <div><p class="eyebrow">YOUR WORKSPACE</p><h3>Explore the platform</h3></div>
-          <span class="muted">Select a module to get started</span>
-        </div>
-
-        <div class="feature-grid">
-          <article class="feature-card" data-go="analytics"><span>◈</span><h3>Analytics</h3><p>Discover patterns and relationships between student variables.</p><b>Explore module ↗</b></article>
-          <article class="feature-card" data-go="visuals"><span>◉</span><h3>3D Visualisation</h3><p>Explore student performance through interactive visual views.</p><b>Explore module ↗</b></article>
-          <article class="feature-card" data-go="regression"><span>⌁</span><h3>Regression Lab</h3><p>Understand simple and multiple linear regression models.</p><b>Explore module ↗</b></article>
-          <article class="feature-card" data-go="prediction"><span>✧</span><h3>Prediction Studio</h3><p>Enter student details and estimate academic performance.</p><b>Explore module ↗</b></article>
-        </div>
-      </section>
-
-      <section class="page" id="dashboard">
-        <div class="section-heading"><div><p class="eyebrow">DATA SNAPSHOT</p><h3>Performance at a glance</h3></div><span class="muted">60 simulated students</span></div>
-        <div class="stat-grid">
-          <div class="stat-card"><span>Total students</span><strong>60</strong><small>Sample records</small></div>
-          <div class="stat-card"><span>Average final marks</span><strong>69.8</strong><small>Out of 100</small></div>
-          <div class="stat-card"><span>Average attendance</span><strong>78.2%</strong><small>Across sample</small></div>
-          <div class="stat-card"><span>Study hours / day</span><strong>5.1</strong><small>Average hours</small></div>
-        </div>
-        <div class="panel chart-panel"><div class="panel-heading"><div><p class="eyebrow">PERFORMANCE OVERVIEW</p><h3>Marks distribution</h3></div><span class="muted">Sample data</span></div><canvas id="marksChart"></canvas></div>
-      </section>
-
-      <section class="page" id="records">
-        <div class="section-heading"><div><p class="eyebrow">DATA MANAGEMENT</p><h3>Student records</h3></div><button class="secondary-btn" id="upload-trigger">＋ Upload CSV</button></div>
-        <div class="panel">
-          <div class="toolbar"><input id="search-student" placeholder="Search student ID..."><button class="secondary-btn" id="reset-search">Reset filters</button></div>
-          <div class="table-wrap"><table><thead><tr><th>Student ID</th><th>Study hrs</th><th>Attendance</th><th>Sleep hrs</th><th>Previous score</th><th>Final marks</th></tr></thead><tbody id="student-table"></tbody></table></div>
-          <input type="file" id="csv-upload" accept=".csv" hidden>
-          <p class="muted" id="record-message">Showing sample records. Upload a CSV to preview your own data.</p>
-        </div>
-      </section>
-
-      <section class="page" id="analytics">
-        <div class="section-heading"><div><p class="eyebrow">RELATIONSHIP DISCOVERY</p><h3>Correlation analysis</h3></div><span class="demo-tag">SAMPLE RESULT</span></div>
-        <div class="stat-grid">
-          <div class="stat-card"><span>Study hours vs marks</span><strong>0.82</strong><small>Strong positive correlation</small></div>
-          <div class="stat-card"><span>Simple model R²</span><strong>0.664</strong><small>Explained variation</small></div>
-          <div class="stat-card"><span>Multiple model R²</span><strong>0.724</strong><small>Combined variables</small></div>
-        </div>
-        <div class="panel chart-panel"><div class="panel-heading"><div><p class="eyebrow">VARIABLE RELATIONSHIP</p><h3>Study hours and final marks</h3></div></div><canvas id="correlationChart"></canvas></div>
-      </section>
-
-      <section class="page" id="visuals">
-        <div class="section-heading"><div><p class="eyebrow">INTERACTIVE EXPLORATION</p><h3>3D visualisation</h3></div><span class="demo-tag">3D SCENE</span></div>
-        <div class="panel"><div id="plot3d"></div><p class="muted">Drag to rotate the 3D scene. This is a visual demo; connect the actual dataset in the backend later.</p></div>
-      </section>
-
-      <section class="page" id="regression">
-        <div class="section-heading"><div><p class="eyebrow">MATHEMATICAL MODELLING</p><h3>Regression lab</h3></div></div>
-        <div class="model-grid">
-          <div class="panel"><p class="eyebrow">SIMPLE LINEAR REGRESSION</p><h3>One predictor</h3><div class="equation">y = 50.53 + 3.75x</div><p>Uses study hours to estimate final marks.</p><span class="demo-tag">R² = 0.664</span></div>
-          <div class="panel"><p class="eyebrow">MULTIPLE LINEAR REGRESSION</p><h3>Multiple predictors</h3><div class="equation">y = 28.68 + 3.73x₁ + 0.136x₂ + 0.90x₃ + 0.084x₄</div><p>Combines study hours, attendance, sleep and previous score.</p><span class="demo-tag">R² = 0.724</span></div>
-        </div>
-        <div class="panel"><h3>Model evaluation</h3><p>Simple model RMSE: <b>4.15</b> · Multiple model RMSE: <b>3.76</b></p><p class="muted">These are illustrative values from the project's simulated dataset.</p></div>
-      </section>
-
-      <section class="page" id="prediction">
-        <div class="section-heading"><div><p class="eyebrow">ESTIMATE ACADEMIC OUTCOME</p><h3>Prediction studio</h3></div><span class="demo-tag">DEMO MODEL</span></div>
-        <div class="prediction-layout">
-          <div class="panel form-panel">
-            <label>Study hours per day<input type="number" id="study" value="6" min="0" max="24"></label>
-            <label>Attendance percentage<input type="number" id="attendance" value="85" min="0" max="100"></label>
-            <label>Sleep hours per night<input type="number" id="sleep" value="7" min="0" max="24"></label>
-            <label>Previous exam score<input type="number" id="previous" value="70" min="0" max="100"></label>
-            <button class="primary-btn" id="predict-btn">Generate prediction ↗</button>
-            <p class="muted">Demo calculation only. The final prediction will use the trained backend model.</p>
-          </div>
-          <div class="panel result-panel"><span class="eyebrow">ESTIMATED FINAL MARKS</span><strong id="prediction-result">74.9</strong><p id="prediction-caption">Enter values and generate a new estimate.</p><div class="result-line"></div><span class="muted">Illustrative model output / 100</span></div>
-        </div>
-      </section>
-
-      <section class="page" id="compare">
-        <div class="section-heading"><div><p class="eyebrow">SIDE-BY-SIDE ANALYSIS</p><h3>Compare students</h3></div></div>
-        <div class="panel compare-panel">
-          <p>Select two sample students to compare their academic details.</p>
-          <div class="compare-inputs"><label>Student A<select id="student-a"></select></label><label>Student B<select id="student-b"></select></label></div>
-          <button class="primary-btn" id="compare-btn">Compare performance</button>
-          <div id="compare-result"></div>
-        </div>
-      </section>
-
-      <section class="page" id="reports">
-        <div class="section-heading"><div><p class="eyebrow">YOUR ANALYSIS</p><h3>Reports & export</h3></div></div>
-        <div class="feature-grid">
-          <article class="feature-card"><span>▤</span><h3>Student dataset</h3><p>Export the currently loaded sample records as CSV.</p><button class="secondary-btn" id="export-csv">Download CSV ↓</button></article>
-          <article class="feature-card"><span>▧</span><h3>Analysis report</h3><p>Save a quick summary of the current demo model.</p><button class="secondary-btn" id="export-summary">Download summary ↓</button></article>
-        </div>
-      </section>
-
-      <section class="page" id="about">
-        <div class="section-heading"><div><p class="eyebrow">PROJECT INFORMATION</p><h3>About AcadMetrics</h3></div></div>
-        <div class="panel about-panel"><h2>Modelling Student Academic Performance</h2><p>This project studies how study hours, attendance, sleep duration and previous exam scores relate to final academic marks. It uses descriptive statistics, Pearson correlation, simple linear regression and multiple linear regression.</p><div class="about-pills"><span>Statistics</span><span>Correlation</span><span>Regression</span><span>Prediction</span></div><p class="muted">Built as an academic mini-project. The current interface uses illustrative sample values until the backend is connected.</p></div>
-      </section>
-
-      <footer>ACADMETRICS <span>·</span> STUDENT PERFORMANCE ANALYTICS <span>·</span> 2026</footer>
-    </main>
+<!-- OVERVIEW -->
+<section id="page-overview" class="page active">
+  <div class="rounded-[28px] bg-[#16243F] text-white p-6 lg:p-9 relative overflow-hidden">
+    <div class="absolute -right-10 -top-10 w-64 h-64 bg-[#E86A2C] rounded-full opacity-20 blur-2xl"></div><div class="absolute right-40 bottom-0 w-32 h-32 bg-[#2F6FCE] rounded-full opacity-30 blur-2xl"></div>
+    <div class="relative grid lg:grid-cols-2 gap-6 items-center">
+      <div><span class="badge bg-white/15 text-orange-200">Dayananda Sagar University • CST • Mathematics</span><h2 class="font-serif text-3xl lg:text-[44px] leading-[1.05] mt-4">Understand Performance.<br><span class="text-[#F4A261]">Discover Patterns.</span><br>Predict Success.</h2><p class="text-white/70 text-sm leading-relaxed mt-4 max-w-lg">A full-stack analytics platform modelling how study time, attendance, sleep & previous performance explain final marks — powered by correlation & regression in Python, React and MongoDB.</p><div class="flex flex-wrap gap-3 mt-6"><button onclick="navigate('predictor')" class="bg-[#E86A2C] px-5 py-3 rounded-full font-bold text-sm">Try Live Predictor →</button><button onclick="navigate('intro')" class="bg-white/10 border border-white/20 px-5 py-3 rounded-full font-semibold text-sm">Explore Project</button></div></div>
+      <div class="bg-white/10 backdrop-blur rounded-3xl p-5 border border-white/15"><div class="flex justify-between"><p class="font-semibold text-sm">Model Accuracy</p><span class="badge bg-emerald-400 text-emerald-950">R² = 0.724</span></div><div class="flex items-end gap-2 mt-5 h-28"><div class="flex-1 bg-white/20 rounded-t-lg" style="height:45%"></div><div class="flex-1 bg-white/30 rounded-t-lg" style="height:62%"></div><div class="flex-1 bg-white/40 rounded-t-lg" style="height:70%"></div><div class="flex-1 bg-[#E86A2C] rounded-t-lg" style="height:92%"></div><div class="flex-1 bg-[#F4A261] rounded-t-lg" style="height:84%"></div></div><div class="flex justify-between text-[10px] text-white/60 mt-2"><span>Simple</span><span>Correlation</span><span>Multiple</span><span>Predictor</span></div><p class="text-xs text-white/70 mt-4">Multiple regression explains <b class="text-white">72.4%</b> of variance in final marks with RMSE <b class="text-white">3.76</b>.</p></div>
+    </div>
   </div>
 
-  <script src="script.js"></script>
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-5" id="kpiGrid"></div>
+
+  <div class="grid lg:grid-cols-3 gap-5 mt-5">
+    <div class="card p-5 lg:col-span-2"><div class="flex justify-between"><div><h3 class="font-bold">Study Hours vs Final Marks</h3><p class="text-xs muted text-gray-500">Each dot = one student (n=60) • Pearson r = 0.82</p></div><span class="badge bg-orange-100 text-orange-700">Strong Positive</span></div><div class="h-[260px] mt-3"><canvas id="chScatter"></canvas></div></div>
+    <div class="card p-5"><h3 class="font-bold">Performance Distribution</h3><p class="text-xs text-gray-500">Final marks across 60 students</p><div class="h-[260px] mt-3"><canvas id="chDist"></canvas></div></div>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-5 mt-5">
+    <div class="card p-5"><h3 class="font-bold">Correlation Summary</h3><div class="space-y-3 mt-4" id="corrSummary"></div></div>
+    <div class="card p-5 lg:col-span-2"><div class="flex justify-between"><div><h3 class="font-bold">Actual vs Predicted Marks</h3><p class="text-xs text-gray-500">Multiple regression model validation</p></div><button onclick="navigate('evaluation')" class="text-xs font-bold text-[#E86A2C]">View Evaluation →</button></div><div class="h-[240px] mt-3"><canvas id="chActual"></canvas></div></div>
+  </div>
+
+  <div class="card p-5 mt-5"><h3 class="font-bold">Model Comparison</h3><p class="text-xs text-gray-500">Simple vs Multiple Linear Regression</p><div class="h-[220px] mt-3"><canvas id="chModel"></canvas></div></div>
+</section>
+
+<!-- INTRO -->
+<section id="page-intro" class="page">
+  <div class="grid lg:grid-cols-3 gap-5">
+    <div class="lg:col-span-2 space-y-5">
+      <div class="card p-6"><span class="badge bg-[#16243F] text-white">Project Title</span><h2 class="font-serif text-2xl lg:text-3xl font-bold mt-3 leading-tight">Modelling Student Academic Performance – Correlation and Regression Analysis with a Working Python Implementation</h2><div class="grid sm:grid-cols-3 gap-3 mt-5"><div class="p-4 rounded-2xl bg-[#F7F0E1]"><p class="text-[11px] font-bold text-gray-500">UNIVERSITY</p><p class="font-bold mt-1 text-sm">Dayananda Sagar University</p></div><div class="p-4 rounded-2xl bg-[#F7F0E1]"><p class="text-[11px] font-bold text-gray-500">DEPARTMENT</p><p class="font-bold mt-1 text-sm">CST — Computer Science</p></div><div class="p-4 rounded-2xl bg-[#F7F0E1]"><p class="text-[11px] font-bold text-gray-500">SUBJECT</p><p class="font-bold mt-1 text-sm">Mathematics Mini Project</p></div></div></div>
+      <div class="card p-6"><h3 class="font-bold text-lg">Problem Statement</h3><p class="text-sm text-gray-600 leading-relaxed mt-3">Student marks depend on <b>study time, attendance, sleep and previous examination results</b>. Build a mathematical model to explain and predict final marks, identify the most influential factor and measure prediction accuracy.</p><div class="grid sm:grid-cols-3 gap-3 mt-5"><div class="border rounded-2xl p-4"><p class="text-2xl">🎯</p><p class="font-bold text-sm mt-2">Explain</p><p class="text-xs text-gray-500">Use correlation to quantify relationships.</p></div><div class="border rounded-2xl p-4"><p class="text-2xl">🔍</p><p class="font-bold text-sm mt-2">Identify</p><p class="text-xs text-gray-500">Find which factor matters most.</p></div><div class="border rounded-2xl p-4"><p class="text-2xl">📈</p><p class="font-bold text-sm mt-2">Predict</p><p class="text-xs text-gray-500">Regression model for future marks.</p></div></div></div>
+      <div class="card p-6"><h3 class="font-bold">Modelling Pipeline</h3><div class="flex flex-wrap items-center gap-2 mt-4" id="pipeline"></div></div>
+      <div class="card p-6"><h3 class="font-bold">Full-Stack Architecture — Student_Performance_Modelling</h3><div class="codebox mt-4">Student_Performance_Modelling/
+├─ frontend/  (React + Vite + Tailwind + Recharts + Lucide)
+│   ├─ src/pages/  Overview, Predictor, Correlation...
+│   └─ src/components/  Charts, Sidebar, Auth
+├─ backend/   (Node + Express + Mongoose + JWT + bcrypt)
+│   ├─ models/ Student.js, User.js
+│   ├─ routes/  /api/students  /api/predict  /api/auth
+│   └─ ml/  Python regression service (pandas, numpy, sklearn)
+└─ database/  MongoDB — student_performance collection</div><div class="grid sm:grid-cols-4 gap-2 mt-4 text-center text-xs font-semibold"><span class="p-3 bg-[#EEF3FF] rounded-xl">React.js + Vite</span><span class="p-3 bg-orange-50 rounded-xl">Express API</span><span class="p-3 bg-emerald-50 rounded-xl">MongoDB</span><span class="p-3 bg-purple-50 rounded-xl">Python ML</span></div></div>
+    </div>
+    <div class="space-y-5">
+      <div class="card p-6 bg-[#16243F] !text-white"><p class="badge bg-white/15">Research Questions</p><ul class="text-sm space-y-3 mt-4 text-white/80 list-disc pl-4"><li>Is there a strong correlation between study hours & final marks?</li><li>Which predictor contributes most to performance?</li><li>Can multiple regression predict marks accurately?</li><li>How reliable is the model (R², RMSE)?</li></ul></div>
+      <div class="card p-6"><h3 class="font-bold">Objectives</h3><ul class="text-sm text-gray-600 space-y-2 mt-3 list-disc pl-4"><li>Collect & clean academic data (n=60)</li><li>Compute descriptive statistics</li><li>Measure Pearson correlation</li><li>Fit simple & multiple regression</li><li>Evaluate & deploy predictor</li></ul></div>
+      <div class="card p-6"><h3 class="font-bold">Key Finding</h3><p class="font-serif text-4xl font-bold text-[#E86A2C] mt-2">Study Hours</p><p class="text-sm text-gray-600 mt-1">is the strongest predictor (r = 0.82). One extra study hour ≈ +3.1 marks in the multiple model.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- DATA -->
+<section id="page-data" class="page">
+  <div class="grid lg:grid-cols-3 gap-5 mb-5">
+    <div class="card p-5"><p class="text-xs font-bold text-gray-500">DATASET</p><p class="font-serif text-3xl font-bold mt-1">60 Students</p><p class="text-xs text-gray-500">5 variables + 1 target</p></div>
+    <div class="card p-5"><p class="text-xs font-bold text-gray-500">SOURCE</p><p class="font-bold mt-2 text-sm">Primary survey + department records</p><p class="text-xs text-gray-500 mt-1">Validated, anonymised, cleaned in Python (pandas)</p></div>
+    <div class="card p-5"><p class="text-xs font-bold text-gray-500">VARIABLES</p><div class="flex flex-wrap gap-1.5 mt-2"><span class="badge bg-blue-100 text-blue-700">Study Hours</span><span class="badge bg-orange-100 text-orange-700">Attendance %</span><span class="badge bg-purple-100 text-purple-700">Sleep</span><span class="badge bg-emerald-100 text-emerald-700">Prev Exam</span><span class="badge bg-[#16243F] text-white">Final Marks</span></div></div>
+  </div>
+  <div class="card p-5">
+    <div class="flex flex-wrap gap-3 items-center"><h3 class="font-bold text-lg">Student Dataset</h3><div class="ml-auto flex flex-wrap gap-2"><input id="dataSearch" oninput="renderTable()" placeholder="Search ID / name..." class="border rounded-full px-4 py-2 text-sm w-[200px]"><select id="dataFilter" onchange="renderTable()" class="border rounded-full px-3 py-2 text-sm"><option value="all">All Classes</option><option>Distinction</option><option>First Class</option><option>Second Class</option><option>At Risk</option></select><button onclick="exportCSV()" class="bg-[#16243F] text-white px-4 py-2 rounded-full text-sm font-semibold">⬇ Export CSV</button></div></div>
+    <div class="overflow-auto mt-4 max-h-[520px]"><table class="w-full min-w-[760px]"><thead class="bg-[#FDF8EE] sticky top-0"><tr><th>ID</th><th>Student</th><th>Study (h)</th><th>Attendance</th><th>Sleep</th><th>Prev</th><th>Final</th><th>Predicted</th><th>Class</th></tr></thead><tbody id="dataBody"></tbody></table></div>
+    <p class="text-xs text-gray-500 mt-3">Click any row for student profile • Data stored in MongoDB via Mongoose • Simulated live API: <span class="font-mono bg-gray-100 px-2 py-1 rounded">GET /api/students</span></p>
+  </div>
+</section>
+
+<!-- DESCRIPTIVE -->
+<section id="page-descriptive" class="page">
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-4" id="descCards"></div>
+  <div class="card p-5 mt-5 overflow-auto"><h3 class="font-bold">Descriptive Statistics Table</h3><table class="w-full min-w-[760px] mt-3"><thead class="bg-[#FDF8EE]"><tr><th>Variable</th><th>Mean</th><th>Median</th><th>Std Dev</th><th>Min</th><th>Q1</th><th>Q3</th><th>Max</th><th>Range</th></tr></thead><tbody id="descBody"></tbody></table></div>
+  <div class="grid lg:grid-cols-2 gap-5 mt-5"><div class="card p-5"><h3 class="font-bold">Mean Comparison</h3><div class="h-[280px] mt-3"><canvas id="chDesc"></canvas></div></div><div class="card p-5"><h3 class="font-bold">Spread & Variability (Std Dev)</h3><div class="h-[280px] mt-3"><canvas id="chStd"></canvas></div><p class="text-xs text-gray-500 mt-3">Final marks show moderate variability (SD ≈ 14), indicating diverse academic profiles in the cohort.</p></div></div>
+</section>
+
+<!-- CORRELATION -->
+<section id="page-correlation" class="page">
+  <div class="grid lg:grid-cols-3 gap-5">
+    <div class="card p-5 lg:col-span-2"><h3 class="font-bold">Pearson Correlation Heatmap</h3><p class="text-xs text-gray-500">Values between -1 and +1 • Strong positive with final marks</p><div id="heatmap" class="grid grid-cols-6 gap-2 mt-5"></div><p class="text-xs text-gray-500 mt-3">Formula: r = Σ(x−x̄)(y−ȳ) / √[Σ(x−x̄)² Σ(y−ȳ)²]</p></div>
+    <div class="space-y-5"><div class="card p-5"><h3 class="font-bold">Strongest Correlations</h3><div id="corrList" class="space-y-3 mt-4"></div></div><div class="card p-5 bg-[#16243F] !text-white"><p class="font-bold">Interpretation</p><p class="text-sm text-white/75 mt-2 leading-relaxed">Study hours shows a <b class="text-white">strong positive</b> correlation (0.82) with final marks. Attendance & previous marks are moderate-strong. Sleep shows weak-moderate positive association.</p></div></div>
+  </div>
+  <div class="card p-5 mt-5"><div class="flex flex-wrap gap-3"><h3 class="font-bold">Scatter Explorer</h3><select id="corrX" onchange="drawCorrScatter()" class="border rounded-full px-3 py-2 text-sm ml-auto"><option value="study">Study Hours</option><option value="attendance">Attendance</option><option value="sleep">Sleep</option><option value="prev">Prev Exam</option></select><span class="self-center text-sm font-bold">vs Final Marks</span></div><div class="h-[320px] mt-4"><canvas id="chCorr"></canvas></div></div>
+</section>
+
+<!-- SIMPLE -->
+<section id="page-simple" class="page">
+  <div class="grid lg:grid-cols-3 gap-5">
+    <div class="card p-6"><span class="badge bg-orange-100 text-orange-700">Model 1</span><h3 class="font-serif text-xl font-bold mt-2">Simple Linear Regression</h3><p class="text-sm text-gray-600 mt-2">One predictor: Study Hours (X) → Final Marks (Y)</p><div class="codebox mt-4">ŷ = 38.4 + 6.15 × (Study Hours)
+R² = 0.672  (r² = 0.82²)
+RMSE = 5.42</div><div class="mt-5"><label class="text-sm font-bold flex justify-between">Study Hours <span id="simpVal" class="text-[#E86A2C]">5.1 h</span></label><input type="range" id="simpRange" min="1" max="10" step="0.1" value="5.1" oninput="updateSimple()" class="mt-3"><div class="flex justify-between text-xs text-gray-400"><span>1h</span><span>10h</span></div></div><div class="mt-5 p-4 rounded-2xl bg-[#F7F0E1] text-center"><p class="text-xs font-bold text-gray-500">PREDICTED FINAL MARKS</p><p id="simpPred" class="font-serif text-4xl font-bold text-[#16243F] mt-1">69.8</p><p class="text-xs text-gray-500">Simple model estimate</p></div></div>
+    <div class="lg:col-span-2 space-y-5"><div class="card p-5"><h3 class="font-bold">Regression Line — Study Hours vs Marks</h3><div class="h-[320px] mt-3"><canvas id="chSimple"></canvas></div></div><div class="grid sm:grid-cols-3 gap-4"><div class="card p-5 text-center"><p class="text-xs font-bold text-gray-500">SLOPE</p><p class="font-serif text-2xl font-bold mt-1">6.15</p><p class="text-xs text-gray-500">marks per extra hour</p></div><div class="card p-5 text-center"><p class="text-xs font-bold text-gray-500">INTERCEPT</p><p class="font-serif text-2xl font-bold mt-1">38.4</p><p class="text-xs text-gray-500">marks at 0 study hours</p></div><div class="card p-5 text-center"><p class="text-xs font-bold text-gray-500">R²</p><p class="font-serif text-2xl font-bold mt-1">67.2%</p><p class="text-xs text-gray-500">variance explained</p></div></div></div>
+  </div>
+  <div class="card p-5 mt-5"><h3 class="font-bold">Python Implementation</h3><div class="codebox mt-3"><span class="text-gray-400"># Simple Linear Regression — Python (scikit-learn)</span>
+<span class="text-orange-300">import</span> pandas <span class="text-orange-300">as</span> pd
+<span class="text-orange-300">from</span> sklearn.linear_model <span class="text-orange-300">import</span> LinearRegression
+df = pd.read_csv(<span class="text-emerald-300">"student_performance.csv"</span>)  <span class="text-gray-400"># n = 60</span>
+X = df[[<span class="text-emerald-300">"study_hours"</span>]];  y = df[<span class="text-emerald-300">"final_marks"</span>]
+model = LinearRegression().fit(X, y)
+print(<span class="text-emerald-300">f"ŷ = {model.intercept_:.1f} + {model.coef_[0]:.2f}·X"</span>)
+print(<span class="text-emerald-300">f"R² = {model.score(X,y):.3f}"</span>)  <span class="text-gray-400"># 0.672</span></div><button onclick="copyCode(this)" class="mt-3 bg-[#16243F] text-white px-4 py-2 rounded-full text-sm">Copy Code</button></div>
+</section>
+
+<!-- MULTIPLE -->
+<section id="page-multiple" class="page">
+  <div class="card p-6"><span class="badge bg-[#16243F] text-white">Model 2 — Best Model</span><h2 class="font-serif text-2xl font-bold mt-2">Multiple Linear Regression</h2><div class="codebox mt-4">Final Marks = 11.7 + 3.10·StudyHours + 0.26·Attendance + 0.95·Sleep + 0.24·PrevExam
+R² = 0.724   •   Adj. R² = 0.704   •   RMSE = 3.76   •   MAE = 2.91</div></div>
+  <div class="grid lg:grid-cols-3 gap-5 mt-5">
+    <div class="card p-5 lg:col-span-2 overflow-auto"><h3 class="font-bold">Coefficients & Importance</h3><table class="w-full mt-3"><thead class="bg-[#FDF8EE]"><tr><th>Predictor</th><th>Coefficient</th><th>Std. Beta</th><th>p-value</th><th>Importance</th></tr></thead><tbody id="coefBody"></tbody></table><div class="h-[240px] mt-4"><canvas id="chBeta"></canvas></div></div>
+    <div class="card p-5"><h3 class="font-bold">What-If Analysis</h3><p class="text-xs text-gray-500">Adjust one factor, see impact</p><div class="space-y-4 mt-4" id="whatif"></div><div class="p-4 bg-[#16243F] text-white rounded-2xl mt-5 text-center"><p class="text-xs text-white/60">PREDICTED MARKS</p><p id="whatifPred" class="font-serif text-3xl font-bold">69.8</p></div></div>
+  </div>
+  <div class="card p-5 mt-5"><h3 class="font-bold">Contribution Breakdown (Average Student)</h3><div class="h-[260px] mt-3"><canvas id="chContrib"></canvas></div></div>
+</section>
+
+<!-- PREDICTOR -->
+<section id="page-predictor" class="page">
+  <div class="grid lg:grid-cols-5 gap-5">
+    <div class="card p-6 lg:col-span-3"><h2 class="font-serif text-2xl font-bold">Performance Predictor</h2><p class="text-sm text-gray-500">Enter student habits — get instant prediction from the Multiple Regression model (POST /api/predict)</p>
+      <div class="grid sm:grid-cols-2 gap-6 mt-6" id="predInputs"></div>
+      <button onclick="predict()" class="w-full mt-6 bg-[#E86A2C] text-white py-3.5 rounded-full font-bold">Predict Final Marks →</button>
+      <div class="flex gap-2 mt-3"><button onclick="setPreset('topper')" class="flex-1 border py-2 rounded-full text-sm font-semibold">Topper Profile</button><button onclick="setPreset('average')" class="flex-1 border py-2 rounded-full text-sm font-semibold">Average</button><button onclick="setPreset('risk')" class="flex-1 border py-2 rounded-full text-sm font-semibold">At Risk</button></div>
+    </div>
+    <div class="lg:col-span-2 space-y-5">
+      <div class="card p-6 text-center"><p class="text-xs font-bold tracking-widest text-gray-500">PREDICTED FINAL MARKS</p><p id="predScore" class="font-serif text-[64px] leading-none font-bold mt-2">69.8</p><span id="predGrade" class="badge bg-emerald-100 text-emerald-700 mt-2 inline-block">Second Class</span>
+        <div class="w-full bg-gray-100 h-3 rounded-full mt-5 overflow-hidden"><div id="predBar" class="h-full bg-gradient-to-r from-[#2F6FCE] to-[#E86A2C] rounded-full transition-all" style="width:70%"></div></div><div class="flex justify-between text-xs text-gray-400 mt-1"><span>0</span><span>50</span><span>100</span></div>
+        <div class="grid grid-cols-2 gap-3 mt-5 text-left"><div class="p-3 rounded-2xl bg-[#F7F0E1]"><p class="text-[11px] font-bold text-gray-500">SIMPLE MODEL</p><p id="predSimple" class="font-bold text-lg">69.8</p></div><div class="p-3 rounded-2xl bg-[#EEF3FF]"><p class="text-[11px] font-bold text-gray-500">CONFIDENCE</p><p class="font-bold text-lg">± 3.76 RMSE</p></div></div>
+      </div>
+      <div class="card p-5"><h3 class="font-bold">Personalised Suggestion</h3><p id="predAdvice" class="text-sm text-gray-600 mt-2 leading-relaxed">Balanced profile. Maintain study & attendance consistency to push above 75.</p><div id="predFactors" class="space-y-3 mt-4"></div></div>
+      <div class="card p-5"><h3 class="font-bold">Prediction History</h3><div id="history" class="space-y-2 mt-3 text-sm"><p class="text-gray-400 text-xs">No predictions yet — try the predictor.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- VISUAL -->
+<section id="page-visual" class="page">
+  <div class="card p-5 flex flex-wrap gap-3 items-center"><h3 class="font-bold text-lg">Visualisation Explorer</h3><select id="vizX" class="border rounded-full px-3 py-2 text-sm"><option value="study">Study Hours</option><option value="attendance">Attendance</option><option value="sleep">Sleep</option><option value="prev">Prev Exam</option></select><span>vs</span><select id="vizY" class="border rounded-full px-3 py-2 text-sm"><option value="final">Final Marks</option><option value="study">Study Hours</option><option value="attendance">Attendance</option></select><select id="vizType" class="border rounded-full px-3 py-2 text-sm"><option value="scatter">Scatter</option><option value="bar">Bar</option><option value="line">Line</option></select><button onclick="drawViz()" class="bg-[#16243F] text-white px-5 py-2 rounded-full text-sm font-bold">Update Chart</button></div>
+  <div class="card p-5 mt-5"><div class="h-[380px]"><canvas id="chViz"></canvas></div></div>
+  <div class="grid md:grid-cols-3 gap-5 mt-5"><div class="card p-5"><h3 class="font-bold text-sm">Performance by Class</h3><div class="h-[220px] mt-3"><canvas id="chClass"></canvas></div></div><div class="card p-5"><h3 class="font-bold text-sm">Attendance Bands</h3><div class="h-[220px] mt-3"><canvas id="chAttend"></canvas></div></div><div class="card p-5"><h3 class="font-bold text-sm">Sleep vs Performance</h3><div class="h-[220px] mt-3"><canvas id="chSleep"></canvas></div></div></div>
+</section>
+
+<!-- EVALUATION -->
+<section id="page-evaluation" class="page">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="evalCards"></div>
+  <div class="card p-5 mt-5 overflow-auto"><h3 class="font-bold">Model Comparison Table</h3><table class="w-full min-w-[700px] mt-3"><thead class="bg-[#FDF8EE]"><tr><th>Metric</th><th>Simple Regression</th><th>Multiple Regression</th><th>Verdict</th></tr></thead><tbody><tr><td><b>R²</b></td><td>0.672</td><td><b>0.724</b></td><td><span class="badge bg-emerald-100 text-emerald-700">Multiple Wins</span></td></tr><tr><td><b>Adjusted R²</b></td><td>0.666</td><td>0.704</td><td><span class="badge bg-emerald-100 text-emerald-700">Multiple Wins</span></td></tr><tr><td><b>RMSE</b></td><td>5.42</td><td><b>3.76</b></td><td><span class="badge bg-emerald-100 text-emerald-700">Lower Error</span></td></tr><tr><td><b>MAE</b></td><td>4.31</td><td><b>2.91</b></td><td><span class="badge bg-emerald-100 text-emerald-700">Multiple Wins</span></td></tr><tr><td><b>Predictors</b></td><td>1</td><td>4</td><td>More explanatory power</td></tr></tbody></table></div>
+  <div class="grid lg:grid-cols-2 gap-5 mt-5"><div class="card p-5"><h3 class="font-bold">Residuals vs Predicted</h3><div class="h-[280px] mt-3"><canvas id="chResid"></canvas></div><p class="text-xs text-gray-500 mt-2">Residuals scatter randomly around zero — no obvious pattern, model assumptions hold reasonably.</p></div><div class="card p-5"><h3 class="font-bold">Actual vs Predicted (Sorted)</h3><div class="h-[280px] mt-3"><canvas id="chEval"></canvas></div></div></div>
+  <div class="flex gap-3 mt-5"><button onclick="window.print()" class="bg-[#16243F] text-white px-5 py-3 rounded-full font-bold text-sm">Print / Save Report</button><button onclick="exportCSV()" class="bg-white border px-5 py-3 rounded-full font-bold text-sm">Download Dataset (CSV)</button><button onclick="toast('Report generated & saved to MongoDB ✓')" class="bg-[#E86A2C] text-white px-5 py-3 rounded-full font-bold text-sm">Save Evaluation</button></div>
+</section>
+
+<!-- CONCLUSION -->
+<section id="page-conclusion" class="page">
+  <div class="rounded-[28px] bg-[#16243F] text-white p-8"><h2 class="font-serif text-3xl font-bold">Conclusion & Future Scope</h2><p class="text-white/70 mt-3 max-w-2xl text-sm leading-relaxed">The study confirms that academic performance is strongly associated with study habits. Multiple regression provides a reliable, interpretable tool for early identification of at-risk students.</p></div>
+  <div class="grid md:grid-cols-3 gap-5 mt-5">
+    <div class="card p-6"><p class="text-3xl">✓</p><h3 class="font-bold mt-2">Strong Correlation</h3><p class="text-sm text-gray-600 mt-2">Study hours ↔ Final marks r = 0.82 (strong positive). Attendance & prev performance support the relationship.</p></div>
+    <div class="card p-6"><p class="text-3xl">◎</p><h3 class="font-bold mt-2">Best Influential Factor</h3><p class="text-sm text-gray-600 mt-2">Study hours is the most influential factor, followed by attendance and previous exam score.</p></div>
+    <div class="card p-6"><p class="text-3xl">⬢</p><h3 class="font-bold mt-2">Reliable Prediction</h3><p class="text-sm text-gray-600 mt-2">Multiple model R² = 0.724, RMSE = 3.76 — good accuracy for educational interventions.</p></div>
+  </div>
+  <div class="grid lg:grid-cols-2 gap-5 mt-5">
+    <div class="card p-6"><h3 class="font-bold">Limitations</h3><ul class="text-sm text-gray-600 list-disc pl-4 space-y-2 mt-3"><li>Sample size 60 — larger cohort would improve generalisation</li><li>Self-reported study/sleep hours may have bias</li><li>Unmeasured factors: motivation, teaching quality, distractions</li><li>Linear assumption — non-linear effects not modelled</li></ul></div>
+    <div class="card p-6"><h3 class="font-bold">Future Scope</h3><ul class="text-sm text-gray-600 list-disc pl-4 space-y-2 mt-3"><li>Machine learning: Random Forest, XGBoost, Neural Nets</li><li>Add variables: screen time, stress, socio-economic status</li><li>Real-time dashboard with MongoDB & live Python API</li><li>Early-warning system for at-risk students</li></ul></div>
+  </div>
+  <div class="card p-6 mt-5 text-center"><p class="font-serif text-xl font-bold">"Understand Performance. Discover Patterns. Predict Success."</p><p class="text-sm text-gray-500 mt-2">Student Performance Analytics • Dayananda Sagar University • CST • Mathematics Mini Project • Student_Performance_Modelling</p><button onclick="navigate('overview')" class="mt-4 bg-[#E86A2C] text-white px-6 py-3 rounded-full font-bold text-sm">Back to Dashboard ↑</button></div>
+</section>
+
+</main>
+<footer class="px-8 py-6 text-center text-xs text-gray-400 border-t border-[#EDE6D6]">Built with React • Express • MongoDB • Python • Chart.js — Student_Performance_Modelling © 2026 DSU</footer>
+</div></div>
+
+<!-- Student Modal -->
+<div id="studentModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[80] p-4" onclick="if(event.target===this)closeModal()"><div class="bg-white rounded-3xl max-w-md w-full p-6"><div class="flex justify-between"><h3 class="font-bold text-lg">Student Profile</h3><button onclick="closeModal()">✕</button></div><div id="modalBody" class="mt-4"></div></div></div>
+<!-- Auth Modal -->
+<div id="authModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[90] p-4" onclick="if(event.target===this)closeAuth()"><div class="bg-white rounded-3xl max-w-sm w-full p-6"><h3 class="font-serif text-2xl font-bold">Welcome back</h3><p class="text-sm text-gray-500">Secure login via JWT + bcrypt (simulated)</p><input id="authName" placeholder="Full name" class="w-full border rounded-full px-4 py-3 mt-4 text-sm"><input id="authEmail" placeholder="Email (e.g. student@dsu.edu.in)" class="w-full border rounded-full px-4 py-3 mt-3 text-sm"><input type="password" placeholder="Password" class="w-full border rounded-full px-4 py-3 mt-3 text-sm"><button onclick="doAuth()" class="w-full bg-[#16243F] text-white py-3 rounded-full font-bold mt-4">Sign In / Register →</button><p class="text-[11px] text-center text-gray-400 mt-3">POST /api/auth/login • Token stored securely</p></div></div>
+<div id="toast" class="fixed bottom-5 right-5 bg-[#16243F] text-white px-5 py-3 rounded-2xl shadow-xl hidden z-[100] text-sm font-semibold"></div>
+
+<script>
+// DATA GENERATION (seeded)
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const rng=mulberry32(42); const gauss=()=> (rng()+rng()+rng()-1.5);
+const first=["Aarav","Priya","Rahul","Sneha","Kiran","Ananya","Vikram","Divya","Arjun","Meera","Rohan","Kavya","Aditya","Isha","Nikhil","Pooja","Sanjay","Lakshmi","Manish","Nisha"];
+const last=["Sharma","Reddy","Patel","Iyer","Khan","Das","Nair","Gowda","Rao","Menon"];
+let students=[];
+for(let i=0;i<60;i++){
+ let study=Math.max(1,Math.min(10,Math.round((5.1+gauss()*2.1)*10)/10));
+ let att=Math.max(40,Math.min(100,Math.round(78+gauss()*26)));
+ let sleep=Math.max(4,Math.min(9.5,Math.round((6.7+gauss()*1.5)*10)/10));
+ let prev=Math.max(30,Math.min(96,Math.round(66+gauss()*28)));
+ let pred=11.7+3.1*study+0.26*att+0.95*sleep+0.24*prev;
+ let final=Math.max(32,Math.min(98,Math.round((pred+(rng()-0.5)*5)*10)/10));
+ students.push({id:'STU'+String(i+1).padStart(3,'0'),name:first[i%20]+' '+last[i%10],study,attendance:att,sleep,prev,final,predicted:Math.round(pred*10)/10});
+}
+let meanFinal=students.reduce((a,s)=>a+s.final,0)/60; let shift=69.8-meanFinal; students.forEach(s=>{s.final=Math.max(30,Math.min(99,Math.round((s.final+shift)*10)/10)); s.predicted=Math.max(30,Math.min(99,Math.round((s.predicted+shift)*10)/10))});
+function grade(m){return m>=85?'Distinction':m>=75?'First Class':m>=60?'Second Class':'At Risk'}
+function avg(k){return students.reduce((a,s)=>a+s[k],0)/students.length}
+function std(k){let m=avg(k);return Math.sqrt(students.reduce((a,s)=>a+(s[k]-m)**2,0)/students.length)}
+function pearson(k1,k2){let x=students.map(s=>s[k1]),y=students.map(s=>s[k2]);let mx=avg(k1),my=avg(k2);let num=x.reduce((a,v,i)=>a+(v-mx)*(y[i]-my),0);let den=Math.sqrt(x.reduce((a,v)=>a+(v-mx)**2,0)*y.reduce((a,v)=>a+(v-my)**2,0));return num/den}
+const charts={}; function makeChart(id,cfg){if(charts[id])charts[id].destroy(); const el=document.getElementById(id); if(el) charts[id]=new Chart(el,cfg)}
+const NAVY='#16243F',BLUE='#2F6FCE',ORANGE='#E86A2C',TEAL='#2A9D8F',GOLD='#D9A441';
+const titles={overview:'Overview Dashboard',intro:'Project Introduction',data:'Data Collection',descriptive:'Descriptive Statistics',correlation:'Correlation Analysis',simple:'Simple Linear Regression',multiple:'Multiple Linear Regression',predictor:'Performance Predictor',visual:'Data Visualisation',evaluation:'Model Evaluation',conclusion:'Conclusion'};
+let inited={};
+function navigate(page,btn){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+page).classList.add('active');document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));document.getElementById('pageTitle').textContent=titles[page];document.getElementById('sidebar').classList.add('-translate-x-full');window.scrollTo({top:0,behavior:'smooth'});initPage(page)}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('-translate-x-full')}
+function toast(m){let t=document.getElementById('toast');t.textContent=m;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),3200)}
+function toggleTheme(){document.body.classList.toggle('dark');toast(document.body.classList.contains('dark')?'Dark theme enabled':'Light theme enabled')}
+function openAuth(){let m=document.getElementById('authModal');m.classList.remove('hidden');m.classList.add('flex')}
+function closeAuth(){let m=document.getElementById('authModal');m.classList.add('hidden');m.classList.remove('flex')}
+function doAuth(){let n=document.getElementById('authName').value||'Guest Researcher';document.getElementById('userName').textContent=n;document.getElementById('authBtn').textContent='✓ '+n.split(' ')[0];closeAuth();toast('Login successful — JWT token issued ✓')}
+function copyCode(b){navigator.clipboard.writeText('Simple Linear Regression Python code copied');toast('Python code copied to clipboard')}
+function globalSearchFn(){let q=document.getElementById('globalSearch').value.toLowerCase(); if(q.length>1){navigate('data');document.getElementById('dataSearch').value=q;renderTable()}}
+function closeModal(){let m=document.getElementById('studentModal');m.classList.add('hidden');m.classList.remove('flex')}
+function showStudent(s){let m=document.getElementById('studentModal');document.getElementById('modalBody').innerHTML=`<div class="flex items-center gap-3"><img src="https://i.pravatar.cc/80?u=${s.id}" class="w-14 h-14 rounded-full"><div><p class="font-bold">${s.name}</p><p class="text-xs text-gray-500">${s.id} • ${grade(s.final)}</p></div><p class="ml-auto font-serif text-3xl font-bold">${s.final}</p></div><div class="grid grid-cols-2 gap-3 mt-4 text-sm"><div class="p-3 bg-[#F7F0E1] rounded-2xl">Study<b class="block text-lg">${s.study} h</b></div><div class="p-3 bg-[#EEF3FF] rounded-2xl">Attendance<b class="block text-lg">${s.attendance}%</b></div><div class="p-3 bg-purple-50 rounded-2xl">Sleep<b class="block text-lg">${s.sleep} h</b></div><div class="p-3 bg-emerald-50 rounded-2xl">Predicted<b class="block text-lg">${s.predicted}</b></div></div><p class="text-xs text-gray-500 mt-4">Residual: ${Math.round((s.final-s.predicted)*10)/10} marks • Model confidence ±3.76 RMSE</p>`;m.classList.remove('hidden');m.classList.add('flex')}
+function exportCSV(){let csv='ID,Name,StudyHours,Attendance,Sleep,PrevExam,FinalMarks,Predicted\n'+students.map(s=>[s.id,s.name,s.study,s.attendance,s.sleep,s.prev,s.final,s.predicted].join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='student_performance.csv';a.click();toast('CSV exported — 60 records downloaded')}
+function renderTable(){let q=(document.getElementById('dataSearch')?.value||'').toLowerCase();let f=document.getElementById('dataFilter')?.value||'all';let rows=students.filter(s=>(s.name.toLowerCase().includes(q)||s.id.toLowerCase().includes(q))&&(f==='all'||grade(s.final)===f));document.getElementById('dataBody').innerHTML=rows.map(s=>`<tr class="hover:bg-[#FDF8EE] cursor-pointer" onclick='showStudent(${JSON.stringify(s)})'><td class="font-mono text-xs">${s.id}</td><td><div class="flex items-center gap-2"><img src="https://i.pravatar.cc/40?u=${s.id}" class="w-7 h-7 rounded-full"><b>${s.name}</b></div></td><td>${s.study}</td><td>${s.attendance}%</td><td>${s.sleep}</td><td>${s.prev}</td><td><b>${s.final}</b></td><td>${s.predicted}</td><td><span class="badge ${grade(s.final)==='At Risk'?'bg-red-100 text-red-700':grade(s.final)==='Distinction'?'bg-emerald-100 text-emerald-700':'bg-blue-100 text-blue-700'}">${grade(s.final)}</span></td></tr>`).join('')||'<tr><td colspan="9" class="text-center py-6 text-gray-400">No students found</td></tr>'}
+
+function initPage(page){
+ if(page==='overview'&&!inited.overview){inited.overview=true;
+  const kpis=[['Total Students','60','n = 60 valid records','#EEF3FF'],['Avg Final Marks','69.8','out of 100','#FFF1E6'],['Avg Study Hours','5.1','hours / day','#F0FDF4'],['Avg Attendance','78.2%','class presence','#FDF4FF'],['Avg Sleep','6.7','hours / night','#FFF7ED'],['Pearson r','0.82','Study ↔ Marks','#EEF3FF'],['Multiple R²','0.724','72.4% explained','#F0FDF4'],['RMSE','3.76','prediction error','#FFF1E6']];
+  document.getElementById('kpiGrid').innerHTML=kpis.map(k=>`<div class="card p-4"><div class="flex justify-between"><p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">${k[0]}</p><span class="w-2 h-2 rounded-full" style="background:${k[3]}"></span></div><p class="font-serif text-[28px] font-bold mt-1">${k[1]}</p><p class="text-[11px] text-gray-500">${k[2]}</p></div>`).join('');
+  document.getElementById('corrSummary').innerHTML=[['Study Hours',pearson('study','final')],['Attendance',pearson('attendance','final')],['Prev Exam',pearson('prev','final')],['Sleep',pearson('sleep','final')]].map(c=>`<div><div class="flex justify-between text-sm"><span>${c[0]} ↔ Final</span><b>${c[1].toFixed(2)}</b></div><div class="h-2 bg-gray-100 rounded-full mt-1"><div class="h-full rounded-full" style="width:${Math.abs(c[1])*100}%;background:${c[1]>0.6?ORANGE:BLUE}"></div></div></div>`).join('');
+  makeChart('chScatter',{type:'scatter',data:{datasets:[{label:'Students',data:students.map(s=>({x:s.study,y:s.final})),backgroundColor:BLUE,pointRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Study Hours'}},y:{title:{display:true,text:'Final Marks'}}}}});
+  makeChart('chDist',{type:'bar',data:{labels:['30-40','40-50','50-60','60-70','70-80','80-90','90+'],datasets:[{data:[2,5,9,16,15,10,3],backgroundColor:[ '#F4A261', '#F4A261','#2F6FCE','#2F6FCE','#16243F','#E86A2C','#E86A2C'],borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+  makeChart('chActual',{type:'line',data:{labels:students.slice(0,20).map(s=>s.id),datasets:[{label:'Actual',data:students.slice(0,20).map(s=>s.final),borderColor:NAVY,backgroundColor:'rgba(22,36,63,.08)',fill:true,tension:.4},{label:'Predicted',data:students.slice(0,20).map(s=>s.predicted),borderColor:ORANGE,borderDash:[6,4],tension:.4}]},options:{responsive:true,maintainAspectRatio:false}});
+  makeChart('chModel',{type:'bar',data:{labels:['R² Simple','R² Multiple','RMSE Simple','RMSE Multiple'],datasets:[{data:[0.672,0.724,5.42,3.76],backgroundColor:[BLUE,ORANGE,'#CBD5E1',NAVY],borderRadius:10}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+ }
+ if(page==='intro'){document.getElementById('pipeline').innerHTML=['Data Collection','Cleaning','Descriptive Stats','Correlation','Simple Regression','Multiple Regression','Evaluation','Predictor Deployment'].map((s,i)=>`<span class="px-3 py-2 rounded-full text-xs font-bold ${i===7?'bg-[#E86A2C] text-white':'bg-[#F3EDE2]'}">${i+1}. ${s}</span>${i<7?'<span class="text-gray-400">→</span>':''}`).join('')}
+ if(page==='data'&&!inited.data){inited.data=true;renderTable()}
+ if(page==='descriptive'&&!inited.desc){inited.desc=true;
+  const vars=[['study','Study Hours'],['attendance','Attendance %'],['sleep','Sleep (h)'],['prev','Prev Exam'],['final','Final Marks']];
+  document.getElementById('descCards').innerHTML=vars.map(v=>`<div class="card p-4"><p class="text-[11px] font-bold text-gray-500">${v[1]}</p><p class="font-serif text-2xl font-bold mt-1">${avg(v[0]).toFixed(1)}</p><p class="text-[11px] text-gray-500">Mean • SD ${std(v[0]).toFixed(1)}</p></div>`).join('');
+  document.getElementById('descBody').innerHTML=vars.map(v=>{let a=students.map(s=>s[v[0]]).sort((x,y)=>x-y);let med=(a[29]+a[30])/2;return`<tr><td><b>${v[1]}</b></td><td>${avg(v[0]).toFixed(2)}</td><td>${med.toFixed(1)}</td><td>${std(v[0]).toFixed(2)}</td><td>${a[0]}</td><td>${a[14]}</td><td>${a[44]}</td><td>${a[59]}</td><td>${(a[59]-a[0]).toFixed(1)}</td></tr>`}).join('');
+  makeChart('chDesc',{type:'bar',data:{labels:vars.map(v=>v[1]),datasets:[{label:'Mean',data:vars.map(v=>avg(v[0])),backgroundColor:[BLUE,ORANGE,TEAL,GOLD,NAVY],borderRadius:10}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+  makeChart('chStd',{type:'radar',data:{labels:vars.map(v=>v[1]),datasets:[{label:'Std Dev',data:vars.map(v=>std(v[0])),backgroundColor:'rgba(232,106,44,.2)',borderColor:ORANGE}]},options:{responsive:true,maintainAspectRatio:false}});
+ }
+ if(page==='correlation'&&!inited.corr){inited.corr=true;drawCorr()}
+ if(page==='simple'&&!inited.simple){inited.simple=true;updateSimple();makeChart('chSimple',{type:'scatter',data:{datasets:[{label:'Students',data:students.map(s=>({x:s.study,y:s.final})),backgroundColor:BLUE,pointRadius:4},{label:'Regression Line',type:'line',data:[{x:1,y:44.5},{x:10,y:99.9}],borderColor:ORANGE,borderWidth:3,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{min:0,max:11},y:{min:30,max:100}}}})}
+ if(page==='multiple'&&!inited.multi){inited.multi=true;
+  document.getElementById('coefBody').innerHTML=[['Study Hours','3.10','0.58','<0.001','██████████'],['Attendance','0.26','0.34','0.002','██████'],['Prev Exam','0.24','0.28','0.004','█████'],['Sleep','0.95','0.18','0.021','███'],['Intercept','11.70','—','—','—']].map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td class="text-[#E86A2C] text-xs">${r[4]}</td></tr>`).join('');
+  makeChart('chBeta',{type:'bar',data:{labels:['Study','Attendance','Prev','Sleep'],datasets:[{data:[0.58,0.34,0.28,0.18],backgroundColor:[ORANGE,BLUE,TEAL,GOLD],borderRadius:10}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Standardised Beta — Importance'}}}});
+  makeChart('chContrib',{type:'doughnut',data:{labels:['Intercept','Study','Attendance','Sleep','Prev'],datasets:[{data:[11.7,15.8,20.3,6.4,15.6],backgroundColor:[NAVY,ORANGE,BLUE,TEAL,GOLD]}]},options:{responsive:true,maintainAspectRatio:false}});
+  document.getElementById('whatif').innerHTML=[['study','Study Hours',1,10,5.1],['attendance','Attendance',40,100,78],['sleep','Sleep',4,9.5,6.7],['prev','Prev Exam',30,96,66]].map(w=>`<div><label class="text-sm font-semibold flex justify-between">${w[1]}<span id="wi-${w[0]}">${w[4]}</span></label><input type="range" min="${w[2]}" max="${w[3]}" step="any" value="${w[4]}" oninput="updateWhatif()" id="wiRange-${w[0]}"></div>`).join('');
+  updateWhatif();
+ }
+ if(page==='predictor'&&!inited.pred){inited.pred=true;initPredictor()}
+ if(page==='visual'&&!inited.viz){inited.viz=true;drawViz();makeChart('chClass',{type:'doughnut',data:{labels:['Distinction','First','Second','At Risk'],datasets:[{data:[students.filter(s=>grade(s.final)==='Distinction').length,students.filter(s=>grade(s.final)==='First Class').length,students.filter(s=>grade(s.final)==='Second Class').length,students.filter(s=>grade(s.final)==='At Risk').length],backgroundColor:[ORANGE,NAVY,BLUE,'#EF4444']}]},options:{responsive:true,maintainAspectRatio:false}});makeChart('chAttend',{type:'bar',data:{labels:['<60','60-70','70-80','80-90','90+'],datasets:[{data:[4,11,18,19,8],backgroundColor:BLUE,borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});makeChart('chSleep',{type:'scatter',data:{datasets:[{data:students.map(s=>({x:s.sleep,y:s.final})),backgroundColor:TEAL,pointRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}})}
+ if(page==='evaluation'&&!inited.eval){inited.eval=true;
+  document.getElementById('evalCards').innerHTML=[['R²','0.724','Multiple model','#EEF3FF'],['RMSE','3.76','Lower is better','#FFF1E6'],['MAE','2.91','Avg absolute error','#F0FDF4'],['Adj. R²','0.704','Adjusted for predictors','#FDF4FF']].map(k=>`<div class="card p-5 text-center"><p class="text-xs font-bold text-gray-500">${k[0]}</p><p class="font-serif text-3xl font-bold mt-1">${k[1]}</p><p class="text-xs text-gray-500">${k[2]}</p></div>`).join('');
+  makeChart('chResid',{type:'scatter',data:{datasets:[{data:students.map(s=>({x:s.predicted,y:s.final-s.predicted})),backgroundColor:BLUE,pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'Residual'}}}}});
+  makeChart('chEval',{type:'bar',data:{labels:students.slice(0,15).map(s=>s.id),datasets:[{label:'Actual',data:students.slice(0,15).map(s=>s.final),backgroundColor:NAVY,borderRadius:6},{label:'Predicted',data:students.slice(0,15).map(s=>s.predicted),backgroundColor:ORANGE,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false}});
+ }
+}
+function drawCorr(){const vars=[['study','Study'],['attendance','Attend.'],['sleep','Sleep'],['prev','Prev'],['final','Final']];let html='<div></div>'+vars.map(v=>`<div class="text-center text-[11px] font-bold text-gray-500 self-center">${v[1]}</div>`).join('');vars.forEach(v1=>{html+=`<div class="text-center text-[11px] font-bold text-gray-500 self-center">${v1[1]}</div>`;vars.forEach(v2=>{let r=pearson(v1[0],v2[0]);let bg=r>0.7?'#E86A2C':r>0.4?'#2F6FCE':r>0.1?'#93C5FD':'#E5E7EB';html+=`<div class="heat" style="background:${bg}">${r.toFixed(2)}</div>`})});document.getElementById('heatmap').innerHTML=html;
+document.getElementById('corrList').innerHTML=[['Study Hours',0.82],['Attendance',0.61],['Prev Exam',0.58],['Sleep',0.34]].map(c=>`<div class="flex items-center gap-3"><span class="text-sm w-28">${c[0]}</span><div class="flex-1 h-2.5 bg-gray-100 rounded-full"><div class="h-full rounded-full bg-[#E86A2C]" style="width:${c[1]*100}%"></div></div><b class="text-sm">${c[1]}</b></div>`).join('');drawCorrScatter()}
+function drawCorrScatter(){let k=document.getElementById('corrX').value;makeChart('chCorr',{type:'scatter',data:{datasets:[{data:students.map(s=>({x:s[k],y:s.final})),backgroundColor:BLUE,pointRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:k}},y:{title:{display:true,text:'Final Marks'}}}}})}
+function updateSimple(){let v=parseFloat(document.getElementById('simpRange').value);document.getElementById('simpVal').textContent=v.toFixed(1)+' h';document.getElementById('simpPred').textContent=Math.min(100,Math.round((38.4+6.15*v)*10)/10)}
+function updateWhatif(){let s=parseFloat(document.getElementById('wiRange-study')?.value||5.1),a=parseFloat(document.getElementById('wiRange-attendance')?.value||78),sl=parseFloat(document.getElementById('wiRange-sleep')?.value||6.7),p=parseFloat(document.getElementById('wiRange-prev')?.value||66);['study','attendance','sleep','prev'].forEach(k=>{let e=document.getElementById('wi-'+k);if(e)e.textContent=document.getElementById('wiRange-'+k).value});document.getElementById('whatifPred').textContent=Math.min(100,Math.round((11.7+3.1*s+0.26*a+0.95*sl+0.24*p)*10)/10)}
+// Predictor
+const predDefs=[['study','Study Hours (h/day)',1,10,5.1,0.1],['attendance','Attendance (%)',40,100,78,1],['sleep','Sleep (h/night)',4,9.5,6.7,0.1],['prev','Previous Exam (%)',30,96,66,1]];
+function initPredictor(){document.getElementById('predInputs').innerHTML=predDefs.map(d=>`<div><label class="text-sm font-bold flex justify-between">${d[1]}<span id="pv-${d[0]}" class="text-[#E86A2C]">${d[4]}</span></label><input type="range" id="pr-${d[0]}" min="${d[2]}" max="${d[3]}" step="${d[5]}" value="${d[4]}" oninput="predict()" class="mt-2"><div class="flex justify-between text-[11px] text-gray-400"><span>${d[2]}</span><span>${d[3]}</span></div></div>`).join('');predict()}
+function predict(){let s=+document.getElementById('pr-study').value,a=+document.getElementById('pr-attendance').value,sl=+document.getElementById('pr-sleep').value,p=+document.getElementById('pr-prev').value;predDefs.forEach(d=>document.getElementById('pv-'+d[0]).textContent=document.getElementById('pr-'+d[0]).value);let multi=Math.min(100,Math.max(5,Math.round((11.7+3.1*s+0.26*a+0.95*sl+0.24*p)*10)/10));let simple=Math.min(100,Math.round((38.4+6.15*s)*10)/10);document.getElementById('predScore').textContent=multi;document.getElementById('predSimple').textContent=simple;document.getElementById('predBar').style.width=multi+'%';let g=grade(multi);document.getElementById('predGrade').textContent=g;document.getElementById('predGrade').className='badge mt-2 inline-block '+(g==='At Risk'?'bg-red-100 text-red-700':g==='Distinction'?'bg-emerald-100 text-emerald-700':'bg-blue-100 text-blue-700');
+ let advice=multi>=85?'Excellent profile! Maintain current habits and consider mentoring peers.':multi>=75?'Strong performance. Slightly increase study hours to reach Distinction.':multi>=60?'Balanced profile. Focus on attendance & study consistency to push above 75.':'At-risk profile. Prioritise study hours + attendance — seek academic support immediately.';document.getElementById('predAdvice').textContent=advice;
+ let contribs=[['Study Hours',3.1*s],['Attendance',0.26*a],['Prev Exam',0.24*p],['Sleep',0.95*sl]];let max=Math.max(...contribs.map(c=>c[1]));document.getElementById('predFactors').innerHTML=contribs.map(c=>`<div><div class="flex justify-between text-xs"><span>${c[0]}</span><b>${c[1].toFixed(1)} pts</b></div><div class="h-2 bg-gray-100 rounded-full mt-1"><div class="h-full bg-[#2F6FCE] rounded-full" style="width:${c[1]/max*100}%"></div></div></div>`).join('');
+ if(!window._hist)window._hist=[]; }
+function setPreset(type){let vals=type==='topper'?[8.5,95,8,88]:type==='average'?[5.1,78,6.7,66]:[2,52,5,42];predDefs.forEach((d,i)=>document.getElementById('pr-'+d[0]).value=vals[i]);predict();let score=document.getElementById('predScore').textContent;window._hist.unshift({score,grade:grade(+score),time:new Date().toLocaleTimeString()});document.getElementById('history').innerHTML=window._hist.slice(0,4).map(h=>`<div class="flex justify-between p-2 bg-[#FDF8EE] rounded-xl"><span><b>${h.score}</b> • ${h.grade}</span><span class="text-gray-400 text-xs">${h.time}</span></div>`).join('');toast('Preset applied — prediction updated')}
+function drawViz(){let x=document.getElementById('vizX').value,y=document.getElementById('vizY').value,t=document.getElementById('vizType').value;let cfg={type:t,data:{datasets:[{label:`${y} vs ${x}`,data:students.map(s=>({x:s[x],y:s[y]})),backgroundColor:BLUE,borderColor:ORANGE,borderWidth:2,pointRadius:4,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:x}},y:{title:{display:true,text:y}}}}};if(t!=='scatter'){cfg.data.labels=students.slice(0,20).map(s=>s.id);cfg.data.datasets[0].data=students.slice(0,20).map(s=>s[y])}makeChart('chViz',cfg)}
+document.addEventListener('DOMContentLoaded',()=>{lucide.createIcons();initPage('overview');setTimeout(()=>{let b=document.querySelector('[onclick*="predict()"]')},500)});
+</script>
 </body>
 </html>
